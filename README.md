@@ -20,6 +20,7 @@ print(aboveZero(input))
 ```
 Tortilla is currently being created. The above code cannot yet run.
 
+Tortilla has:
 * Modern syntax that is easy to read and learn
 * A 2-level error system: soft errors allow the code to keep running while hard errors stop compilation
 * Class oriented, allowing for easy inheritance, and the ability to run code on instance creation
