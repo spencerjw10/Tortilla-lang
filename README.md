@@ -25,7 +25,8 @@ Tortilla is currently being created. The above code cannot yet run.
 * Class oriented, allowing for easy inheritance, and the ability to run code on instance creation
 * Statically typed with a first-class generics system
 
-Tortilla is a fast language with helpful errors and a forgiving type system.
+Tortilla is a general purpose language which has helpful errors and a forgiving type system.
+It compiles to the LLVM, allowing for connection to WASM and speed.
 
 Tortilla is still in Version 0, with a completed Lexer written in Python.
 
