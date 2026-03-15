@@ -1,9 +1,8 @@
 # Documentation
-[Intro]
 
 ## Comments and Whitespace
 In Tortilla, all whitespace is ignored. 
-You could write you entire program in one line if you wanted to.
+You could write your entire program in one line if you wanted to.
 Spaces are needed between multiple words, but not next to operators.
 
 * Single-Line Comments start with #
@@ -20,29 +19,20 @@ int a += 3 # This is too
 
 ## Data Types
 In Tortilla, there are 7 basic types:
-- int
-- float
-- bigint
-- doub
-- char
-- bool
-- null
-Integers and
+|Type |Size |Default|
+|---|---|---|
+|int  |32 Bits |0
+|float  |32 Bits |0.0
+|bigInt  |64 Bits |0
+|doub  |64 Bits |0.0
+|char  |8 Bits |""
+|bool  |1 Bit |false
+|null  | |null
 
-int   32b   0
-null   1b   null   //equal to default of everything else
-bigint   64b   0
-float   32b   0.0
-doub   64b   0.0
-char   8b   “”
-bool   1b   false
-str   ?   “”
-array   ?   []
-dict   ?   {}
-set ? ()
-class   ?   (){}
-func   ?   (){}
-
+There are also 3 collection types, talked about later:
+- Arrays (Including Strings)
+- Dictionaries
+- Sets
 
 ## Variables and Assignment
 
