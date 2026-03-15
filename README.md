@@ -33,4 +33,4 @@ Tortilla is still in Version 0, with a completed Lexer written in Python.
 - V1 — Multiple distribution methods, public release (before Summer 2028)
 - V2 — Standard libraries and language additions
 
-Link to complete specifications: https://github.com/spencerjw10/Tortilla-lang/blob/12c5c900048eeb0afc78ef8a0b30037cb57f4602/spec/Tortilla-spec.md
+Link to complete specifications: https://github.com/spencerjw10/Tortilla-lang/blob/main/spec/Tortilla-spec.md
