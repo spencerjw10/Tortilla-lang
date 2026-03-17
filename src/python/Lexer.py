@@ -48,7 +48,8 @@ def tokenize(code):
         '}': 'Rbrkt',
         ':': 'Then',
         '.': 'Point',
-        ';': 'Semi'
+        ';': 'Semi',
+        ',': 'Comma'
     }
     doubOps = {
         '++': 'Inc',
