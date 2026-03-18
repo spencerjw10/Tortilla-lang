@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include <iostream>
 #include <string>
+#include <unordered_set>
 #include <vector>
 using namespace std;
 
@@ -101,7 +102,9 @@ int main() {
     char qot = ' ';  //Quotation Type for Strings
     string value = " ";
     string abc = "asdfghjklqwertyuiopzxcvbnmASDFGHJKLQWERTYUIOPZXCVBNM_";
-    string keywords[48] = {
+    string blank = " \n\t";
+    string nums = "1234567890";
+    unordered_set<string> keywords = {
         "is", "not", "in", "has", "xor", "nor", "and",
         "or", "null", "int", "bigInt", "float", "doub",
         "char", "str", "bool", "array", "set", "dict",
@@ -133,6 +136,86 @@ int main() {
             else if (mode == 1 and code[i] == '\n') {
                 mode = 0;
                 i += 1;
+            }
+        }
+        //Normal Mode
+        else if (mode == 0) {
+            if (blank.find(code[i]) != string::npos) {
+                i += 1;
+            }
+            else if (code[i] == '#') {
+                i += 1;
+                if (code[i] == '#') {
+                    mode = 2;
+                    i += 1;
+                }
+                else {
+                    mode = 1;
+                }
+            }
+            //Checks for Number Literals
+            else if (nums.find(code[i]) != string::npos) {
+                //If point becomes True, number is a float
+                bool point = false;
+                string num;
+                num = code[i];
+                i += 1;
+                while (nums.find(code[i]) != string::npos or code[i] == '.') {
+                    num += code[i];
+                    if (code[i] == '.'){
+                        if (point == true){
+                        }
+                        point = true;
+                    }
+                    i += 1;
+                }
+                if (point) {
+                    token curTok = token("Float", num, line, col);
+                    tokens.push_back(curTok);
+                }
+                else {
+                    token curTok = token("Int", num, line, col);
+                    tokens.push_back(curTok);
+                }
+            }
+            //Starts a String
+            else if (code[i] == '`' or code[i] == '"' or code[i] == '\"') {
+                mode = 3;
+                //Type of quote to look for
+                qot = code[i];
+                i += 1;
+            }
+            else if (getDoubOp(code[i], code[i] + 1) != "") {
+                token curTok = token("Operator", getDoubOp(code[i], code[i + 1]), line, col);
+                tokens.push_back(curTok);
+                i += 2;
+            }
+            else if (getSingOp(code[i]) != "") {
+                token curTok = token("Operator", getSingOp(code[i]), line, col);
+                tokens.push_back(curTok);
+                i += 1;
+            }
+            else if (abc.find(code[i]) != string::npos) {
+                string word;
+                word = code[i];
+                i += 1;
+                //Adds characters to the word until it finds a non number, letter, or underspace
+                while (abc.find(code[i]) != string::npos or nums.find(code[i]) != string::npos) {
+                    word += code[i];
+                    i += 1;
+                }
+                if (keywords.count(word)) {
+                    token curTok = token("Keyword", word, line, col);
+                    tokens.push_back(curTok);
+                }
+                else if (word == "true" or word == "false") {
+                    token curTok = token("Bool", word, line, col);
+                    tokens.push_back(curTok);
+                }
+                else {
+                    token curTok = token("Variable", word, line, col);
+                    tokens.push_back(curTok);
+                }
             }
         }
         //String Mode
