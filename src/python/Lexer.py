@@ -83,7 +83,7 @@ def tokenize(code):
             i += 1
         #Normal Mode
         elif mode == 0:
-            if code[i] in ' \n\t,':
+            if code[i] in ' \n\t':
                 i += 1
             elif code[i] == '#':
                 i += 1
