@@ -5,5 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_executable(Tortilla
         main.cpp
+        error.cpp
+        error.h
 
 )
