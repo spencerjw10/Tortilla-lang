@@ -126,8 +126,12 @@ int main() {
 
         //Comment Removal
         if (mode == 1 or mode == 2) {
-            if ((i + 1 < code.length() and code[i] == '#' and code[i + 1] == '#') or (mode == 1 and code[i] == '\n')) {
+            if (mode == 1 and code[i] == '\n') {
                 i += 1;
+                mode = 0;
+            }
+            else if (i + 1 < code.length() and code[i] == '#' and code[i + 1] == '#') {
+                i += 2;
                 mode = 0;
             }
         }
