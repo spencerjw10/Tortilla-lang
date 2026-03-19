@@ -1,5 +1,4 @@
 #include "lexer.h"
-#include <iostream>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -100,7 +99,7 @@ int main() {
     int line = 0;
     int col = 0;
     char qot = ' ';  //Quotation Type for Strings
-    string value = " ";
+    string value = "";
     string abc = "asdfghjklqwertyuiopzxcvbnmASDFGHJKLQWERTYUIOPZXCVBNM_";
     string blank = " \n\t";
     string nums = "1234567890";
@@ -179,13 +178,13 @@ int main() {
                 }
             }
             //Starts a String
-            else if (code[i] == '`' or code[i] == '"' or code[i] == '\"') {
+            else if (code[i] == '`' or code[i] == '`' or code[i] == '\"') {
                 mode = 3;
                 //Type of quote to look for
                 qot = code[i];
                 i += 1;
             }
-            else if (getDoubOp(code[i], code[i] + 1) != "") {
+            else if (getDoubOp(code[i], code[i + 1]) != "") {
                 token curTok = token("Operator", getDoubOp(code[i], code[i + 1]), line, col);
                 tokens.push_back(curTok);
                 i += 2;
@@ -204,12 +203,12 @@ int main() {
                     word += code[i];
                     i += 1;
                 }
-                if (keywords.count(word)) {
-                    token curTok = token("Keyword", word, line, col);
+                if (word == "true" or word == "false") {
+                    token curTok = token("Bool", word, line, col);
                     tokens.push_back(curTok);
                 }
-                else if (word == "true" or word == "false") {
-                    token curTok = token("Bool", word, line, col);
+                else if (keywords.count(word)) {
+                    token curTok = token("Keyword", word, line, col);
                     tokens.push_back(curTok);
                 }
                 else {
@@ -219,7 +218,7 @@ int main() {
             }
         }
         //String Mode
-        else if (mode == 3) {
+        else {
             //Repeats until it finds the correct end quote
             if (code[i] == qot) {
                 token curTok = token("Str", value, line, col);
@@ -232,7 +231,6 @@ int main() {
             }
             i += 1;
         }
-        mode += 1;
     }
     return 0;
 }
