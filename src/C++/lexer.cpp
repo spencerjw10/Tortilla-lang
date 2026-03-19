@@ -1,22 +1,13 @@
 #include "lexer.h"
-#include <string>
 #include <unordered_set>
-#include <vector>
 #include <cctype>
 using namespace std;
 
-class token {
-public:
-    string kind; //Kinds: Variable Name, Keyword, Operator, Int, Float, Bool, Str
-    string val; //Value or specific type e.g. king = Operator, val = 'Plus'
-    int line; //Line number
-    int col; //Column
-    token(string k, string v, int l, int c) {
-        kind = k;
-        val = v;
-        line = l;
-        col = c;
-    }
+token::token(string k, string v, int l, int c) {
+    kind = k;
+    val = v;
+    line = l;
+    col = c;
 };
 string getSingOp(char c) {
     switch(c) {
@@ -91,8 +82,7 @@ string getDoubOp(char first, char second) {
     }
 }
 
-string code = "";
-int main() {
+vector<token> tokenize(string code) {
     int i = 0;
     vector<token> tokens;
     code += " ";  //Adds an ending space to the code so that the index does not go out of bounds
@@ -231,5 +221,5 @@ int main() {
             i += 1;
         }
     }
-    return 0;
+    return tokens;
 }
