@@ -9,5 +9,7 @@ add_executable(Tortilla
         lexer.h
         error.cpp
         error.h
+        AST.cpp
+        AST.h
 
 )

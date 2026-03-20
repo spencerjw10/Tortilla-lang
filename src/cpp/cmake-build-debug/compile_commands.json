@@ -16,5 +16,11 @@
   "command": "/usr/bin/c++ -g -std=gnu++17 -arch arm64 -fcolor-diagnostics -o CMakeFiles/Tortilla.dir/error.cpp.o -c /Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/error.cpp",
   "file": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/error.cpp",
   "output": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/error.cpp.o"
+},
+{
+  "directory": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -std=gnu++17 -arch arm64 -fcolor-diagnostics -o CMakeFiles/Tortilla.dir/AST.cpp.o -c /Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/AST.cpp",
+  "file": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/AST.cpp",
+  "output": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/AST.cpp.o"
 }
 ]
