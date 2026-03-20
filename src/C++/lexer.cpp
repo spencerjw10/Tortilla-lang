@@ -1,11 +1,12 @@
 #include "lexer.h"
 #include <unordered_set>
 #include <cctype>
+#include <utility>
 using namespace std;
 
 token::token(string k, string v, int l, int c) {
-    kind = k;
-    val = v;
+    kind = std::move(k);
+    val = std::move(v);
     line = l;
     col = c;
 };
@@ -57,15 +58,16 @@ string getDoubOp(char first, char second) {
             default:  return "";
             }
         case '/':
-            switch(second) {
-            case '=': return "DivideEql";
-            default:  return "";
+            if (second == '=') {
+                return "DivideEql";
             }
-        case '%':
-            switch(second) {
-            case '=': return "ModEql";
-            default:  return "";
+            return "";
+        case '%': {
+            if (second == '=') {
+                return "ModEql";
             }
+            return "";
+        }
         case '<':
             switch(second) {
             case '=': return "Lte";
@@ -90,7 +92,7 @@ vector<token> tokenize(string code) {
     int line = 0;
     int col = 0;
     char qot = ' ';  //Quotation Type for Strings
-    string value = "";
+    string value;
     unordered_set<string> keywords = {
         "is", "not", "in", "has", "xor", "nor", "and",
         "or", "null", "int", "bigInt", "float", "doub",
@@ -173,12 +175,12 @@ vector<token> tokenize(string code) {
                 qot = code[i];
                 i += 1;
             }
-            else if (getDoubOp(code[i], code[i + 1]) != "") {
+            else if (!getDoubOp(code[i], code[i + 1]).empty()) {
                 token curTok = token("Operator", getDoubOp(code[i], code[i + 1]), line, col);
                 tokens.push_back(curTok);
                 i += 2;
             }
-            else if (getSingOp(code[i]) != "") {
+            else if (!getSingOp(code[i]).empty()) {
                 token curTok = token("Operator", getSingOp(code[i]), line, col);
                 tokens.push_back(curTok);
                 i += 1;

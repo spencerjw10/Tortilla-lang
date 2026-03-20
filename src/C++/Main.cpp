@@ -1,9 +1,12 @@
 #include <iostream>
 #include <string>
-using namespace std;
+#include "lexer.h"
 
 int main() {
-    string code = "";
-
+    std::string code = "int a + b";
+    std::vector<token> tokens = tokenize(code);
+    for (auto & token : tokens) {
+        std::cout << token.kind + " " + token.val + "\n";
+    }
     return 0;
 }
