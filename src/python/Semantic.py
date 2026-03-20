@@ -24,13 +24,14 @@ class Node:
 #expression = expr# /node
 #number lit = num /#
 #string lit = stri /str
-#bool lit = bool /tf
+#bool lit = boo /tf
 #var name = name /str
 #array = extra /array
 #node type spec = kind /str
 #code block = block /array
 #another node = recur /node
-
+#addon bool = add /bool
+#data type = dt /str
 
 #[op, expr1]
 class UnOpNode(Node):
@@ -49,28 +50,28 @@ class BinOpNode(Node):
 class IntNode(Node):
     def __init__(self, num, lin, colum):
         super().__init__(lin, colum)
-        self.val = val
+        self.num = num
 #num
 class FloatNode(Node):
     def __init__(self, num, lin, colum):
         super().__init__(lin, colum)
         self.num = num
-#str
+#stri
 class StrNode(Node):
     def __init__(self, stri, lin, colum):
         super().__init__(lin, colum)
         self.stri = stri
-#bool
+#boo
 class BoolNode(Node):
-    def __init__(self, bool, lin, colum):
+    def __init__(self, boo, lin, colum):
         super().__init__(lin, colum)
-        self.bool = bool
-#name, extra
+        self.boo = boo
+#name, extra1
 class VarNode(Node):
-    def __init__(self, name, extra, lin, colum):
+    def __init__(self, name, extra1, lin, colum):
         super().__init__(lin, colum)
         self.name = name
-        self.extra = extra
+        self.extra1 = extra1
 #kind, expr1
 class AccNode(Node):
     def __init__(self, kind, expr1, lin, colum):
@@ -110,67 +111,78 @@ class IfelNode(Node):
         self.expr1 = expr1
         self.block = block
         self.recur = recur
-#expr1, extra
+#expr1, extra1
 class SwitchNode(Node):
-    def __init__(self, expr1, extra, lin, colum):
+    def __init__(self, expr1, extra1, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
-        self.extra = extra
-#expr1, extra, block, recur
+        self.extra1 = extra1
+#expr1, extra1, block, recur
 class CaseNode(Node):
-    def __init__(self, expr1, extra, block, recur, lin, colum):
+    def __init__(self, expr1, extra1, block, recur, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
-        self.extra = extra
+        self.extra1 = extra1
         self.block = block
         self.recur = recur
-#kind, extra
+#kind, extra1
 class ListNode(Node):
-    def __init__(self, kind, extra, lin, colum):
+    def __init__(self, kind, extra1, lin, colum):
         super().__init__(lin, colum)
         self.kind = kind
-        self.extra = extra
-#str, name, expr1
+        self.extra1 = extra1
+#name, expr1
 class AssignNode(Node):
-    def __init__(self, stri, name, expr1, lin, colum):
+    def __init__(self, name, expr1, lin, colum):
         super().__init__(lin, colum)
-        self.stri = stri
         self.name = name
         self.expr1 = expr1
-#extra
+#extra1
 class ArgsNode(Node):
-    def __init__(self, extra, lin, colum):
+    def __init__(self, extra1, lin, colum):
         super().__init__(lin, colum)
-        self.extra = extra
-#
+        self.extra1 = extra1
+#kind, add, name, extra1, block, dt
 class FuncNode(Node):
-    def __init__(self, kind, concur, name, args, code, returnDataType, lin, colum):
+    def __init__(self, kind, add, name, extra1, block, dt, lin, colum):
         super().__init__(lin, colum)
         self.kind = kind
-        self.concur = concur
+        self.add = add
         self.name = name
-        self.args = args
-        self.code = code
-        self.returnDataType = returnDataType
-#
+        self.extra1 = extra1
+        self.block = block
+        self.dt = dt
+#name, extra1, extra2
 class CallNode(Node):
-    def __init__(self, name, types, args, lin, colum):
+    def __init__(self, name, extra1, extra2, lin, colum):
         super().__init__(lin, colum)
         self.name = name
-        self.types = types
-        self.args = args
-#
+        self.extra1 = extra1
+        self.extra2 = extra2
+#extra1
 class AwaitNode(Node):
-    def __init__(self, vals, lin, colum):
+    def __init__(self, extra1, lin, colum):
         super().__init__(lin, colum)
-        self.vals = vals
-#
+        self.extra1 = extra1
+#extra1
 class ImportNode(Node):
-    def __init__(self, vals, lin, colum):
+    def __init__(self, extra1, lin, colum):
         super().__init__(lin, colum)
-        self.vals = vals
+        self.extra1 = extra1
+#operator = op /str
+#expression = expr# /node
+#number lit = num /#
+#string lit = stri /str
+#bool lit = bool /tf
+#var name = name /str
+#array = extra /array
+#node type spec = kind /str
+#code block = block /array
+#another node = recur /node
+#addon bool = add /bool
+#data type = dt /str
 
-class Parse():
+class Parse:
     def __init__(self, i, tokens, states):
         self.tokens = tokens
         self.i = 0
@@ -211,7 +223,8 @@ class Parse():
             elems = []
             commas = False
             while True:
-                elems.append(self.pratt(0))
+                curAdd = self.pratt(0)
+                elems.append([curAdd, curAdd])
                 if self.peek() and (self.peek().val == "Rpar"):
                     self.consume()
                     break
@@ -224,7 +237,8 @@ class Parse():
         elif tok.val == "Lbrc":
             elems = []
             while True:
-                elems.append(self.pratt(0))
+                curAdd = self.pratt(0)
+                elems.append([curAdd, curAdd])
                 if self.peek() and (self.peek().val == "Rbrc"):
                     self.consume()
                     break
@@ -232,19 +246,18 @@ class Parse():
             left = ListNode("Array", elems, tok.line, tok.col)
         elif tok.val == "Lbrkt":
             elems = []
-            keys = []
             while True:
-                elems.append(self.pratt(0))
+                curElem = self.pratt(0)
+                curKey = None
                 if self.peek() and (self.peek().val == "Rbrkt"):
                     self.consume()
                     break
                 if self.peek() and (self.peek().val == "Then"):
                     self.consume()
-                    keys.append(self.pratt(0))
-                else:
-                    keys.append(0)
+                    curKey = self.pratt(0)
+                elems.append([curElem, curKey])
                 self.consume()
-            left = ListNode("Dict", elems, tok.line, tok.col, keys)
+            left = ListNode("Dict", elems, tok.line, tok.col)
         while True:
             op = self.peek()
             if op is None or op.val not in BPChart:
@@ -256,9 +269,6 @@ class Parse():
             right = self.pratt(bp)
             left = BinOpNode(left, op.val, right, op.line, op.col)
         return left
-    '''
-    Import > import + Var [+ from + Var]
-    '''
     def parsePrgm(self):
         while self.i < len(self.tokens):
             self.states.append(self.parseState())
@@ -294,13 +304,12 @@ class Parse():
             return AwaitNode(vals, line, col)
         if self.tokens[self.i].val == 'import':
             self.consume()
-            thing = []
-            first = self.consume()
-            thing.append(first)
-            if self.peek() and self.peek().val == 'from':
+            extra = []
+            extra.append(self.consume())
+            if self.peek() and self.peek().val == 'spec':
                 self.consume()
-                thing.append(self.consume())
-            return ImportNode(thing, line, col)
+                extra.append(self.consume())
+            return ImportNode(extra, line, col)
         return self.pratt(0)
     def parseFunc(self):
         line = self.tokens[self.i].line

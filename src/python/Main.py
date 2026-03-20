@@ -6,4 +6,5 @@ func john () null {tomm}
 bill{joe,}
 '''
 tokens = tokenize(code)
-tree = AST.Parse(AST.i, tokens, AST.states)
+tree = Semantic.Parse(Semantic.i, tokens, Semantic.states)
+#tree = Semantic.Parse(Semantic.i, tokens, Semantic.states)
