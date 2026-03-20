@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -std=gnu++17 -arch arm64 -fcolor-diagnostics -o CMakeFiles/Tortilla.dir/main.cpp.o -c /Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/main.cpp",
+  "file": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/main.cpp",
+  "output": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/main.cpp.o"
+},
+{
+  "directory": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -std=gnu++17 -arch arm64 -fcolor-diagnostics -o CMakeFiles/Tortilla.dir/lexer.cpp.o -c /Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/lexer.cpp",
+  "file": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/lexer.cpp",
+  "output": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/lexer.cpp.o"
+},
+{
+  "directory": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug",
+  "command": "/usr/bin/c++ -g -std=gnu++17 -arch arm64 -fcolor-diagnostics -o CMakeFiles/Tortilla.dir/error.cpp.o -c /Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/error.cpp",
+  "file": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/error.cpp",
+  "output": "/Users/spencerwhite/CLionProjects/Tortilla-lang/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/error.cpp.o"
+}
+]

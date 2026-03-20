@@ -13,8 +13,8 @@ class Error {
         Error(std::string k, std::string m, int n, int l, int c);
 };
 
-void readErrors(std::vector<Error> errors);
-void addError(std::string kind, int numb, int line, int col);
-bool hasHard(std::vector<Error> errors);
+void readErrors();
+void addError(std::string kind, int numb, int line, int col, std::vector<std::string> vals);
+bool hasHard();
 
 #endif
