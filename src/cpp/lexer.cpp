@@ -1,4 +1,5 @@
 #include "lexer.h"
+#include "error.h"
 #include <unordered_set>
 #include <cctype>
 #include <utility>
@@ -154,6 +155,7 @@ vector<token> tokenize(string code) {
                     num += code[i];
                     if (code[i] == '.'){
                         if (point == true){
+                            addError ("hard", 2, line, col, {});
                         }
                         point = true;
                     }
@@ -206,6 +208,9 @@ vector<token> tokenize(string code) {
                 }
                 token curTok = token(kind, word, line, col);
                 tokens.push_back(curTok);
+            }
+            else {
+                addError("soft", 1, line, col, {to_string(code[i])});
             }
         }
         //String Mode
