@@ -1,5 +1,6 @@
 from Lexer import tokenize
 import AST
+import Semantic
 
 code = '''
 func john () null {tomm}
