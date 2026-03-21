@@ -22,7 +22,7 @@ Tortilla is currently being created. The above code cannot yet run.
 
 Tortilla has:
 * Modern syntax that is easy to read and learn
-* A 2-level error system: soft errors allow the code to keep running while hard errors stop compilation
+* A 2-level error system: soft errors allow the code to run while hard errors stop compilation
 * Class oriented, allowing for easy inheritance, and the ability to run code on instance creation
 * Statically typed with a first-class generics system
 
@@ -32,7 +32,7 @@ It compiles to the LLVM, allowing for connection to WASM and speed.
 Tortilla is still in Version 0, with a completed Lexer written in Python.
 
 ## Roadmap
-- V0 — Working compiler in C++ by 2026
+- V0 — Working compiler in C++ by 2027
 - V0.5 — Full testing and VSCode extension
 - V1 — Multiple distribution methods, public release (before Summer 2028)
 - V2 — Standard libraries and language additions
