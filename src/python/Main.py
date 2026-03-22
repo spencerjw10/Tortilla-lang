@@ -14,6 +14,10 @@ bob = 10
 end
 jumm:[bob](jim, ted)
 '''
+
+"""
+
+"""
 tokens = tokenize(code)
 parser = Semantic.Parse(tokens)
 tree = parser.parsePrgm()

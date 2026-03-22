@@ -34,7 +34,7 @@ class BasicNode(Node):
     def __init__(self, num, kind, lin, colum):
         super().__init__(lin, colum)
         self.num = num
-        sekf.kind = kind
+        self.kind = kind
 #name, extra1
 class VarNode(Node):
     def __init__(self, name, extra1, lin, colum):
@@ -54,14 +54,13 @@ class GroupNode(Node):
         self.expr1 = expr1
 #expr1, block
 class WhileNode(Node):
-    def __init__(self, expr1, block, lin, colum, names=None):
+    def __init__(self, expr1, block, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.block = block
-        self.names = []
 #expr1, expr2, expr3, block
 class ForNode(Node):
-    def __init__(self, expr1, expr2, expr3, block, lin, colum, names=None):
+    def __init__(self, expr1, expr2, expr3, block, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.expr2 = expr2
@@ -69,27 +68,27 @@ class ForNode(Node):
         self.block = block
 #name, expr1, block
 class ForENode(Node):
-    def __init__(self, name, expr1, block, lin, colum, names=None):
+    def __init__(self, name, expr1, block, lin, colum):
         super().__init__(lin, colum)
         self.name = name
         self.expr1 = expr1
         self.block = block
 #expr1, block, recur
 class IfelNode(Node):
-    def __init__(self, expr1, block, recur, lin, colum, names=None):
+    def __init__(self, expr1, block, recur, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.block = block
         self.recur = recur
 #expr1, block
 class SwitchNode(Node):
-    def __init__(self, expr1, block, lin, colum, names=None):
+    def __init__(self, expr1, block, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.block = block
 #expr1, extra1, block, recur
 class CaseNode(Node):
-    def __init__(self, expr1, extra1, block, recur, lin, colum, names=None):
+    def __init__(self, expr1, extra1, block, recur, lin, colum):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.extra1 = extra1
@@ -97,7 +96,7 @@ class CaseNode(Node):
         self.recur = recur
 #block, recur
 class DefaultNode(Node):
-    def __init__(self, block, recur, lin, colum, names=None):
+    def __init__(self, block, recur, lin, colum):
         super().__init__(lin, colum)
         self.block = block
         self.recur = recur
@@ -129,6 +128,7 @@ class FuncNode(Node):
         self.extra1 = extra1
         self.block = block
         self.dt = dt
+        self.names = []
 #name, extra1, extra2
 class CallNode(Node):
     def __init__(self, name, extra1, extra2, lin, colum):
@@ -182,28 +182,28 @@ class Parse:
         if self.i == len(self.tokens):
             #e3
             return False
-        print("hi")
         return self.tokens[self.i]
     def consume(self):
         self.i += 1
         if self.i - 1 == len(self.tokens):
             #e3
-            return None
+            return False
         return self.tokens[self. i - 1]
     def expect(self, val):
         if self.i == len(self.tokens):
             #e3
-            return None
+            return False
         if self.peek().val != val:
             #4
-            return None
+            return False
         return self.consume()
     def pratt(self, minBP):
         tok = self.consume()
         left = 0
         if tok.kind in ("Int", "Float", "Str", "Bool"):
-            left = BasicNode(tok.val, toke.kind, tok.line, tok.col)
+            left = BasicNode(tok.val, tok.kind, tok.line, tok.col)
         elif tok.kind == "Variable":
+            self.i -= 1
             left = self.parseVar()
         elif tok.val in ("not", "BitNot", "Minus"):
             right = self.pratt(90)
@@ -247,7 +247,7 @@ class Parse:
                 elems.append([curElem, curKey])
                 self.consume()
             left = ListNode("Dict", elems, tok.line, tok.col)
-        while True:
+        while self.peek():
             op = self.peek()
             if op is None:
                 #5
