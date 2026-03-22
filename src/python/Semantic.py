@@ -16,7 +16,7 @@ class Node:
 #addon bool = add /bool
 #data type = dt /str
 
-#[op, expr1]
+#op, expr1
 class UnOpNode(Node):
     def __init__(self, op, expr1, lin, colum):
         super().__init__(lin, colum)
@@ -54,13 +54,14 @@ class GroupNode(Node):
         self.expr1 = expr1
 #expr1, block
 class WhileNode(Node):
-    def __init__(self, expr1, block, lin, colum):
+    def __init__(self, expr1, block, lin, colum, names=None):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.block = block
+        self.names = []
 #expr1, expr2, expr3, block
 class ForNode(Node):
-    def __init__(self, expr1, expr2, expr3, block, lin, colum):
+    def __init__(self, expr1, expr2, expr3, block, lin, colum, names=None):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.expr2 = expr2
@@ -68,27 +69,27 @@ class ForNode(Node):
         self.block = block
 #name, expr1, block
 class ForENode(Node):
-    def __init__(self, name, expr1, block, lin, colum):
+    def __init__(self, name, expr1, block, lin, colum, names=None):
         super().__init__(lin, colum)
         self.name = name
         self.expr1 = expr1
         self.block = block
 #expr1, block, recur
 class IfelNode(Node):
-    def __init__(self, expr1, block, recur, lin, colum):
+    def __init__(self, expr1, block, recur, lin, colum, names=None):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.block = block
         self.recur = recur
-#expr1, extra1
+#expr1, block
 class SwitchNode(Node):
-    def __init__(self, expr1, extra1, lin, colum):
+    def __init__(self, expr1, block, lin, colum, names=None):
         super().__init__(lin, colum)
         self.expr1 = expr1
-        self.extra1 = extra1
+        self.block = block
 #expr1, extra1, block, recur
 class CaseNode(Node):
-    def __init__(self, expr1, extra1, block, recur, lin, colum):
+    def __init__(self, expr1, extra1, block, recur, lin, colum, names=None):
         super().__init__(lin, colum)
         self.expr1 = expr1
         self.extra1 = extra1
@@ -96,7 +97,7 @@ class CaseNode(Node):
         self.recur = recur
 #block, recur
 class DefaultNode(Node):
-    def __init__(self, block, recur, lin, colum):
+    def __init__(self, block, recur, lin, colum, names=None):
         super().__init__(lin, colum)
         self.block = block
         self.recur = recur
@@ -120,7 +121,7 @@ class ArgsNode(Node):
         self.extra1 = extra1
 #kind, add, name, extra1, block, dt
 class FuncNode(Node):
-    def __init__(self, kind, add, name, extra1, block, dt, lin, colum):
+    def __init__(self, kind, add, name, extra1, block, dt, lin, colum, names=None):
         super().__init__(lin, colum)
         self.kind = kind
         self.add = add
@@ -262,7 +263,6 @@ class Parse:
             left = BinOpNode(left, op.val, right, op.line, op.col)
         return left
     def parsePrgm(self):
-        print("hi")
         while self.i < len(self.tokens):
             self.nodes.append(self.parseState())
         return self.nodes
@@ -363,6 +363,7 @@ class Parse:
     #start after
     def parseIfel(self):
         line = self.tokens[self.i].line
+
         col = self.tokens[self.i].col
         after = None
         expr = self.pratt(0)
@@ -426,6 +427,7 @@ class Parse:
     def parseAssign(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
+
         kind = self.consume()
         val = self.parseVar()
         self.expect("Assign")
@@ -521,9 +523,12 @@ class Parse:
         return CallNode(name, types, args, line, col)
 
 #Hoister
-class Hoist:
-    def __init__(self, states):
-        self.states = states
-
-    def walkPrgm(self):
-        obob = 2
+def hoist(nodeList):
+    j = 0
+    names = []
+    while j < len(nodeList):
+        if isinstance(nodeList[j], FuncNode):
+            names.append(nodeList[j].name)
+            nodeList[j].names = self.checkList(nodeList[j].block)
+        j += 1
+    return names

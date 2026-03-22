@@ -16,5 +16,4 @@ jumm:[bob](jim, ted)
 '''
 tokens = tokenize(code)
 parser = Semantic.Parse(tokens)
-tree = parser.parsePrgm
-#tree = Semantic.Parse(Semantic.i, tokens, Semantic.states)
+tree = parser.parsePrgm()
