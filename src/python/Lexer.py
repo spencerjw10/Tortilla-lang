@@ -1,4 +1,3 @@
-#Lexer to tokenize code
 def tokenize(code):
     class token:
         def __init__(self, kind, val):

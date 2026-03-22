@@ -1,24 +1,4 @@
-#AST
-i = 0
-states = []
-BPChart = {
-        'Assign':   10, 'PlusEql':  10, 'MinusEql': 10, 'TimesEql': 10, 'DivideEql': 10, 'ModEql': 10, 'Inc': 10, 'Dec': 10,
-        'and': 20, 'or': 20, 'nor': 20, 'xor': 20,
-        'is':  30, 'Less': 30, 'More': 30, 'Lte': 30, 'Gte': 30, 'in':  30, 'has': 30,
-        'BitAnd':   40, 'BitOr': 40, 'BitXor': 40,
-        'Shl':  50, 'Shr': 50,
-        'Plus':   60, 'Minus': 60,
-        'Times':   70, 'Divide': 70, 'Mod': 70,
-        'Power':  80,
-        'Point':   100, 'Lbrc': 100, 'Lpar': 100
-    }
-DT = [
-    "int", "bigInt", "float", "doub", "char", "bool", "str", "array", "dict", "set", "type"
-]
-
-def addError(kind, num, line, col, vals):
-    print(f"Error {num} {kind}: {line} {col}")
-
+#AST Nodes
 class Node:
         def __init__(self, lin, colum):
             self.line = lin
@@ -165,19 +145,25 @@ class ImportNode(Node):
     def __init__(self, extra1, lin, colum):
         super().__init__(lin, colum)
         self.extra1 = extra1
-#operator = op /str
-#expression = expr# /node
-#number lit = num /#
-#string lit = stri /str
-#bool lit = bool /tf
-#var name = name /str
-#array = extra /array
-#node type spec = kind /str
-#code block = block /array
-#another node = recur /node
-#addon bool = add /bool
-#data type = dt /str
 
+
+#Parser
+i = 0
+nodes = []
+BPChart = {
+        'Assign':   10, 'PlusEql':  10, 'MinusEql': 10, 'TimesEql': 10, 'DivideEql': 10, 'ModEql': 10, 'Inc': 10, 'Dec': 10,
+        'and': 20, 'or': 20, 'nor': 20, 'xor': 20,
+        'is':  30, 'Less': 30, 'More': 30, 'Lte': 30, 'Gte': 30, 'in':  30, 'has': 30,
+        'BitAnd':   40, 'BitOr': 40, 'BitXor': 40,
+        'Shl':  50, 'Shr': 50,
+        'Plus':   60, 'Minus': 60,
+        'Times':   70, 'Divide': 70, 'Mod': 70,
+        'Power':  80,
+        'Point':   100, 'Lbrc': 100, 'Lpar': 100
+    }
+DT = [
+    "int", "bigInt", "float", "doub", "char", "bool", "str", "array", "dict", "set", "type"
+]
 '''Error types
 3 End of Script
 4 Expected WORD
@@ -186,15 +172,16 @@ class ImportNode(Node):
 7 Unkown Data Type
 '''
 class Parse:
-    def __init__(self, i, tokens, states):
+    def __init__(self, tokens):
+        self.nodes = []
         self.tokens = tokens
         self.i = 0
-        self.states = []
 
     def peek(self):
         if self.i == len(self.tokens):
             #e3
             return False
+        print("hi")
         return self.tokens[self.i]
     def consume(self):
         self.i += 1
@@ -275,9 +262,10 @@ class Parse:
             left = BinOpNode(left, op.val, right, op.line, op.col)
         return left
     def parsePrgm(self):
+        print("hi")
         while self.i < len(self.tokens):
-            self.states.append(self.parseState())
-        return self.states
+            self.nodes.append(self.parseState())
+        return self.nodes
     #Start on
     def parseState(self):
         line = self.tokens[self.i].line
@@ -531,3 +519,11 @@ class Parse:
             args.append(self.consume())
         self.expect("Rpar")
         return CallNode(name, types, args, line, col)
+
+#Hoister
+class Hoist:
+    def __init__(self, states):
+        self.states = states
+
+    def walkPrgm(self):
+        obob = 2
