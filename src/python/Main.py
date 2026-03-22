@@ -1,11 +1,20 @@
 from Lexer import tokenize
-import AST
 import Semantic
 
 code = '''
-func john () null {tomm}
-bill{joe,}
+a = 2
+array bob = [1, 3, 4]
+if 2 is 3:
+bob -= 3
+end
+switch 2 <= 3:
+case false:
+also true:
+bob = 10
+end
+jumm:[bob](jim, ted)
 '''
 tokens = tokenize(code)
-tree = Semantic.Parse(Semantic.i, tokens, Semantic.states)
+parser = Semantic.Parse(Semantic.i, tokens, Semantic.states)
+tree = parser.parsePrgm
 #tree = Semantic.Parse(Semantic.i, tokens, Semantic.states)

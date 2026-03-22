@@ -16,6 +16,9 @@ DT = [
     "int", "bigInt", "float", "doub", "char", "bool", "str", "array", "dict", "set", "type"
 ]
 
+def addError(kind, num, line, col, vals):
+    print(f"Error {num} {kind}: {line} {col}")
+
 class Node:
         def __init__(self, lin, colum):
             self.line = lin
@@ -46,26 +49,12 @@ class BinOpNode(Node):
         self.expr1 = expr1
         self.op = op
         self.expr2 = expr2
-#num
-class IntNode(Node):
-    def __init__(self, num, lin, colum):
+#num|str|bool, kind
+class BasicNode(Node):
+    def __init__(self, num, kind, lin, colum):
         super().__init__(lin, colum)
         self.num = num
-#num
-class FloatNode(Node):
-    def __init__(self, num, lin, colum):
-        super().__init__(lin, colum)
-        self.num = num
-#stri
-class StrNode(Node):
-    def __init__(self, stri, lin, colum):
-        super().__init__(lin, colum)
-        self.stri = stri
-#boo
-class BoolNode(Node):
-    def __init__(self, boo, lin, colum):
-        super().__init__(lin, colum)
-        self.boo = boo
+        sekf.kind = kind
 #name, extra1
 class VarNode(Node):
     def __init__(self, name, extra1, lin, colum):
@@ -125,16 +114,23 @@ class CaseNode(Node):
         self.extra1 = extra1
         self.block = block
         self.recur = recur
+#block, recur
+class DefaultNode(Node):
+    def __init__(self, block, recur, lin, colum):
+        super().__init__(lin, colum)
+        self.block = block
+        self.recur = recur
 #kind, extra1
 class ListNode(Node):
     def __init__(self, kind, extra1, lin, colum):
         super().__init__(lin, colum)
         self.kind = kind
         self.extra1 = extra1
-#name, expr1
+#kind, name, expr1
 class AssignNode(Node):
-    def __init__(self, name, expr1, lin, colum):
+    def __init__(self, kind, name, expr1, lin, colum):
         super().__init__(lin, colum)
+        self.kind = kind
         self.name = name
         self.expr1 = expr1
 #extra1
@@ -182,6 +178,13 @@ class ImportNode(Node):
 #addon bool = add /bool
 #data type = dt /str
 
+'''Error types
+3 End of Script
+4 Expected WORD
+5 Missing Operator
+6 Unkown Operator
+7 Unkown Data Type
+'''
 class Parse:
     def __init__(self, i, tokens, states):
         self.tokens = tokens
@@ -190,30 +193,28 @@ class Parse:
 
     def peek(self):
         if self.i == len(self.tokens):
-            return None
+            #e3
+            return False
         return self.tokens[self.i]
     def consume(self):
         self.i += 1
         if self.i - 1 == len(self.tokens):
+            #e3
             return None
         return self.tokens[self. i - 1]
     def expect(self, val):
         if self.i == len(self.tokens):
+            #e3
             return None
-        if self.tokens[self.i].val != val:
+        if self.peek().val != val:
+            #4
             return None
         return self.consume()
     def pratt(self, minBP):
         tok = self.consume()
         left = 0
-        if tok.kind == "Int":
-            left = IntNode(tok.val, tok.line, tok.col)
-        elif tok.kind == "Float":
-            left = FloatNode(tok.val, tok.line, tok.col)
-        elif tok.kind == "Str":
-            left = StrNode(tok.val, tok.line, tok.col)
-        elif tok.kind == "Bool":
-            left = BoolNode(tok.val, tok.line, tok.col)
+        if tok.kind in ("Int", "Float", "Str", "Bool"):
+            left = BasicNode(tok.val, toke.kind, tok.line, tok.col)
         elif tok.kind == "Variable":
             left = self.parseVar()
         elif tok.val in ("not", "BitNot", "Minus"):
@@ -225,12 +226,12 @@ class Parse:
             while True:
                 curAdd = self.pratt(0)
                 elems.append([curAdd, curAdd])
-                if self.peek() and (self.peek().val == "Rpar"):
+                if self.peek() and self.peek().val == "Rpar":
                     self.consume()
                     break
                 commas = True
                 self.consume()
-            if commas == False:
+            if not commas:
                 left = GroupNode(elems[0], tok.line, tok.col)
             else:
                 left = ListNode("Set", elems, tok.line, tok.col)
@@ -260,7 +261,11 @@ class Parse:
             left = ListNode("Dict", elems, tok.line, tok.col)
         while True:
             op = self.peek()
-            if op is None or op.val not in BPChart:
+            if op is None:
+                #5
+                break
+            elif op.val not in BPChart:
+                #6
                 break
             bp = BPChart[op.val]
             if bp <= minBP:
@@ -273,52 +278,52 @@ class Parse:
         while self.i < len(self.tokens):
             self.states.append(self.parseState())
         return self.states
+    #Start on
     def parseState(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
-        if self.tokens[self.i].val == 'if':
-            self.i += 1
+        if self.peek().val == 'if':
+            self.consume()
             return self.parseIfel()
-        if self.tokens[self.i].val == 'switch':
-            self.i += 1
+        if self.peek().val == 'switch':
+            self.consume()
             return self.parseSwitch()
-        if self.tokens[self.i].val == 'while':
-            self.i += 1
+        if self.peek().val == 'while':
+            self.consume()
             return self.parseWhile()
-        if self.tokens[self.i].val == 'for':
-            self.i += 1
+        if self.peek().val == 'for':
+            self.consume()
             return self.parseFor()
-        if self.tokens[self.i].val == 'forEach':
-            self.i += 1
+        if self.peek().val == 'forEach':
+            self.consume()
             return self.parseForE()
-        if self.tokens[self.i].val in DT:
+        if self.peek().val in DT:
             return self.parseAssign()
-        if self.tokens[self.i].val == 'return':
+        if self.peek().val == 'return':
             self.consume()
             return self.pratt(0)
-        if self.tokens[self.i].val == 'await':
+        if self.peek().val == 'await':
             self.consume()
             vals = [self.consume()]
-            while self.peek() and self.tokens[self.i].val == "Comma":
+            while self.peek() and self.peek().val == "Comma":
                 vals.append(self.consume())
             return AwaitNode(vals, line, col)
-        if self.tokens[self.i].val == 'import':
+        if self.peek().val == 'import':
             self.consume()
-            extra = []
-            extra.append(self.consume())
+            extra = [self.consume()]
             if self.peek() and self.peek().val == 'spec':
                 self.consume()
                 extra.append(self.consume())
             return ImportNode(extra, line, col)
+        if self.peek().val in ("func", "class"):
+            return self.parseFunc()
         return self.pratt(0)
+    #start on
     def parseFunc(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
         concur = False
-        kind = None
-        if self.peek() and self.seek() in ["func", "class"]:
-            kind = self.seek()
-            self.consume()
+        kind = self.consume()
         if self.peek() and self.peek() == "async":
             concur = True
             self.consume()
@@ -328,14 +333,16 @@ class Parse:
         self.expect("Rpar")
         returnDataType = self.consume()
         self.expect("Lbrkt")
-        code = self.parseBlock("Rbrkt")
+        code = self.parseBlock(["Rbrkt"])
         self.consume()
         return FuncNode(kind, concur, name, args, code, returnDataType, line, col)
+    #start after
     def parseBlock(self, end):
         blockStates = []
-        while self.tokens[self.i].val not in end:
+        while self.peek() and self.peek().val not in end:
             blockStates.append(self.parseState())
         return blockStates
+    #start after
     def parseWhile(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
@@ -343,6 +350,7 @@ class Parse:
         self.expect("Then")
         block = self.parseBlock(["end"])
         return WhileNode(expr, block, line, col)
+    #start after
     def parseFor(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
@@ -354,6 +362,7 @@ class Parse:
         self.expect("Then")
         block = self.parseBlock(["end"])
         return ForNode(init, condition, inc, block, line, col)
+    #start after
     def parseForE(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
@@ -363,6 +372,7 @@ class Parse:
         self.expect("Then")
         block = self.parseBlock(["end"])
         return ForENode(var, expr, block, line, col)
+    #start after
     def parseIfel(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
@@ -370,15 +380,16 @@ class Parse:
         expr = self.pratt(0)
         self.expect("Then")
         block = self.parseBlock(["end", "elif", "else"])
-        if self.tokens[self.i].val == "elif":
-            self.i += 1
+        if self.peek() and self.peek().val == "elif":
+            self.consume()
             after = self.parseIfel()
-        elif self.tokens[self.i].val == "else":
-            self.i += 1
+        elif self.peek() and self.peek().val == "else":
+            self.consume()
             after = self.parseBlock(["end"])
         else:
-            self.i += 1
+            self.expect("end")
         return IfelNode(expr, block, after, line, col)
+    #start after
     def parseSwitch(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
@@ -387,50 +398,63 @@ class Parse:
         cases = self.parseCase()
         self.expect("end")
         return SwitchNode(expr, cases, line, col)
+    #start on
     def parseCase(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
-        expr = None
         also = []
         after = None
-        if self.tokens[self.i].val == "case":
-            self.i += 1
+        if self.peek().val == "case":
+            self.consume()
             expr = self.pratt(0)
             self.expect("Then")
-            if self.tokens[self.i].val == "also":
+            if self.peek().val == "also":
+                self.consume()
                 self.parseAlso(also)
             else:
                 self.expect("default")
                 self.expect("Then")
-            block = self.parseBlock(["case", 'end', 'default'])
-            if self.tokens[self.i].val in ["case", "default"]:
+            block = self.parseBlock(["case", "end", "default"])
+            if self.peek().val in ["case", "default"]:
                 after = self.parseCase()
             return CaseNode(expr, also, block, after, line, col)
+        elif self.peek().val == "default":
+            self.consume()
+            self.expect("Then")
+            block = self.parseBlock(["case", "end"])
+            if self.peek().val == "case":
+                after = self.parseCase()
+            return DefaultNode(block, after, line, col)
+        return None
+    #start after
     def parseAlso(self, alsos):
-        self.i += 1
         alsos.append(self.pratt(0))
         self.expect("Then")
-        if self.tokens[self.i].val == "also":
+        if self.peek().val == "also":
+            self.consume()
             self.parseAlso(alsos)
+        return alsos
+    #start on
     def parseAssign(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
         kind = self.consume()
-        val = self.pratt(0)
-        return AssignNode(kind, val, line, col)
+        val = self.parseVar()
+        self.expect("Assign")
+        expr = self.pratt(0)
+        return AssignNode(kind, val, expr, line, col)
+    #start on
     def parseVar(self):
-        self.i -= 1
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
         name = self.tokens[self.i].val
         self.consume()
-        if self.peek() and self.tokens[self.i].val == "Then":
+        if self.peek() and self.peek().val == "Then":
+            self.consume()
             return self.parseCall(name)
-        self.i -= 1
         extra = []
-        self.consume()
         cur = self.peek()
-        if self.peek() == None:
+        if self.peek() is None:
             return VarNode(name, extra, line, col)
         while cur.val in ['Lbrc', 'Lpar', 'Lbrkt', "Point"]:
             if cur.val == "Point":
@@ -450,7 +474,6 @@ class Parse:
             elif cur.val == "Lpar":
                 self.consume()
                 args = []
-                pars = 1
                 while self.peek() and self.peek().val != "Rpar":
                     args.append(self.pratt(0))
                     if self.peek() and self.peek().val == "Comma":
@@ -468,48 +491,43 @@ class Parse:
             if cur is None:
                 break
         return VarNode(name, extra, line, col)
+    #start after
     def parseArgs(self):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
         args = []
-        if self.tokens[self.i].val not in DT:
+        if self.peek().val not in DT:
+            #7
             return None
         dt = self.consume()
         var = self.consume()
         args.append([dt, var])
-        while self.tokens[self.i].val == "Comma":
+        while self.peek().val == "Comma":
             self.consume()
-            if self.tokens[self.i].val not in DT:
+            if self.peek().val not in DT:
+                #7
                 return None
             dt = self.consume()
             var = self.consume()
             args.append([dt, var])
         return ArgsNode(args, line, col)
+    #start after
     def parseCall(self, name):
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
         name = name
         types = []
         args = []
-        self.consume()
         self.expect("Lbrc")
-        self.consume()
-        var = self.consume()
-        types.append(var)
-        while self.tokens[self.i].val == "Comma":
+        types.append(self.consume())
+        while self.peek().val == "Comma":
             self.consume()
-            var = self.consume()
-            types.append(var)
+            types.append(self.consume())
         self.expect("Rbrc")
-        self.consume()
         self.expect("Lpar")
-        self.consume()
-        var = self.consume()
-        args.append(var)
-        while self.tokens[self.i].val == "Comma":
+        args.append(self.consume())
+        while self.peek().val == "Comma":
             self.consume()
-            var = self.consume()
-            args.append(var)
+            args.append(self.consume())
         self.expect("Rpar")
-        self.consume()
         return CallNode(name, types, args, line, col)
