@@ -7,6 +7,10 @@ array bob = [1, 3, 4]
 if 2 is 3:
 bob -= 3
 end
+func jumm() int {
+    bob *= 2
+    return 10
+}
 switch 2 <= 3:
 case false:
 also true:
@@ -19,5 +23,5 @@ jumm:[bob](jim, ted)
 
 """
 tokens = tokenize(code)
-parser = Semantic.Parse(tokens)
-tree = parser.parsePrgm()
+tree = Semantic.Parse(tokens).parsePrgm()
+tree = Semantic.hoist(tree)

@@ -171,12 +171,14 @@ DT = [
 5 Missing Operator
 6 Unkown Operator
 7 Unkown Data Type
+8 Func/Class inside Conditional
 '''
 class Parse:
     def __init__(self, tokens):
         self.nodes = []
         self.tokens = tokens
         self.i = 0
+        self.inConditional = 0
 
     def peek(self):
         if self.i == len(self.tokens):
@@ -271,18 +273,23 @@ class Parse:
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
         if self.peek().val == 'if':
+            self.inConditional += 1
             self.consume()
             return self.parseIfel()
         if self.peek().val == 'switch':
+            self.inConditional += 1
             self.consume()
             return self.parseSwitch()
         if self.peek().val == 'while':
+            self.inConditional += 1
             self.consume()
             return self.parseWhile()
         if self.peek().val == 'for':
+            self.inConditional += 1
             self.consume()
             return self.parseFor()
         if self.peek().val == 'forEach':
+            self.inConditional += 1
             self.consume()
             return self.parseForE()
         if self.peek().val in DT:
@@ -304,6 +311,9 @@ class Parse:
                 extra.append(self.consume())
             return ImportNode(extra, line, col)
         if self.peek().val in ("func", "class"):
+            if self.inConditional > 0:
+                return None
+                #8
             return self.parseFunc()
         return self.pratt(0)
     #start on
@@ -337,6 +347,7 @@ class Parse:
         expr = self.pratt(0)
         self.expect("Then")
         block = self.parseBlock(["end"])
+        self.inConditional -= 1
         return WhileNode(expr, block, line, col)
     #start after
     def parseFor(self):
@@ -349,6 +360,7 @@ class Parse:
         inc = self.pratt(0)
         self.expect("Then")
         block = self.parseBlock(["end"])
+        self.inConditional -= 1
         return ForNode(init, condition, inc, block, line, col)
     #start after
     def parseForE(self):
@@ -359,11 +371,11 @@ class Parse:
         expr = self.pratt(0)
         self.expect("Then")
         block = self.parseBlock(["end"])
+        self.inConditional -= 1
         return ForENode(var, expr, block, line, col)
     #start after
     def parseIfel(self):
         line = self.tokens[self.i].line
-
         col = self.tokens[self.i].col
         after = None
         expr = self.pratt(0)
@@ -377,6 +389,7 @@ class Parse:
             after = self.parseBlock(["end"])
         else:
             self.expect("end")
+            self.inConditional -= 1
         return IfelNode(expr, block, after, line, col)
     #start after
     def parseSwitch(self):
@@ -386,6 +399,7 @@ class Parse:
         self.expect("Then")
         cases = self.parseCase()
         self.expect("end")
+        self.inConditional -= 1
         return SwitchNode(expr, cases, line, col)
     #start on
     def parseCase(self):
@@ -529,6 +543,83 @@ def hoist(nodeList):
     while j < len(nodeList):
         if isinstance(nodeList[j], FuncNode):
             names.append(nodeList[j].name)
-            nodeList[j].names = self.checkList(nodeList[j].block)
+            nodeList[j].names = hoist(nodeList[j].block)
         j += 1
     return names
+'''Error types
+9 Undeclared Name
+10
+11
+12
+13
+'''
+#Name Checker
+stopNodes = (BasicNode, Node)
+
+class NameCheck():
+    def __init__(self, nodes):
+        self.nodes = nodes
+
+    def check(self, given, names):
+        if given not in names:
+            #Error 9
+            return False
+        return True
+
+    def walkNode(self, node):
+        if isinstance(node, tuple(stopNodes)):
+            obob = 2
+        if isinstance(node, UnOpNode):
+            self.walkNode(node.expr1)
+        if isinstance(node, BinOpNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.expr2)
+        if isinstance(node, VarNode):
+            self.walkNode(node.expr1)
+        if isinstance(node, AccNode):
+            self.walkNode(node.expr1)
+        if isinstance(node, GroupNode):
+            self.walkNode(node.expr1)
+        if isinstance(node, WhileNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+        if isinstance(node, ForNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.expr2)
+            self.walkNode(node.expr3)
+            self.walkNode(node.block)
+        if isinstance(node, ForENode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+        if isinstance(node, IfelNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+            self.walkNode(node.recur)
+        if isinstance(node, SwitchNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+        if isinstance(node, CaseNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.extra1)
+            self.walkNode(node.block)
+            self.walkNode(node.recur)
+        if isinstance(node, DefaultNode):
+            self.walkNode(node.block)
+            self.walkNode(node.recur)
+        if isinstance(node, ListNode):
+            self.walkNode(node.extra1)
+        if isinstance(nodeList[j], AssignNode):
+            self.walkNode(node.expr1)
+        if isinstance(nodeList[j], ArgsNode):
+            self.walkNode(node.extra1)
+        if isinstance(nodeList[j], FuncNode):
+            self.walkNode(node.extra1)
+            self.walkNode(node.block)
+        if isinstance(nodeList[j], CallNode):
+            self.walkNode(node.extra1)
+            self.walkNode(node.extra2)
+        if isinstance(nodeList[j], AwaitNode):
+            self.walkNode(node.extra1)
+        if isinstance(nodeList[j], ImportNode):
+            self.walkNode(node.extra1)
+        return None
