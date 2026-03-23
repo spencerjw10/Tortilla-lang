@@ -9,7 +9,7 @@ class Node:
 #string lit = stri /str
 #bool lit = boo /tf
 #var name = name /str
-#array = extra /array
+#array = extra# /array
 #node type spec = kind /str
 #code block = block /array
 #another node = recur /node
@@ -120,7 +120,7 @@ class ArgsNode(Node):
         self.extra1 = extra1
 #kind, add, name, extra1, block, dt
 class FuncNode(Node):
-    def __init__(self, kind, add, name, extra1, block, dt, lin, colum, names=None):
+    def __init__(self, kind, add, name, extra1, block, dt, lin, colum):
         super().__init__(lin, colum)
         self.kind = kind
         self.add = add
@@ -554,9 +554,8 @@ def hoist(nodeList):
 13
 '''
 #Name Checker
-stopNodes = (BasicNode, Node)
 
-class NameCheck():
+class NameCheck:
     def __init__(self, nodes):
         self.nodes = nodes
 
@@ -566,60 +565,61 @@ class NameCheck():
             return False
         return True
 
-    def walkNode(self, node):
-        if isinstance(node, tuple(stopNodes)):
-            obob = 2
+    def walkNode(self, node, names):
+        newNames = names
         if isinstance(node, UnOpNode):
-            self.walkNode(node.expr1)
+            newNames = self.walkNode(node.expr1, newNames)
         if isinstance(node, BinOpNode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.expr2)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr2, newNames)
         if isinstance(node, VarNode):
-            self.walkNode(node.expr1)
+            newNames = self.walkNode(node.expr1, newNames)
         if isinstance(node, AccNode):
-            self.walkNode(node.expr1)
+            newNames = self.walkNode(node.expr1, newNames)
         if isinstance(node, GroupNode):
-            self.walkNode(node.expr1)
+            newNames = self.walkNode(node.expr1, newNames)
         if isinstance(node, WhileNode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.block)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.block, newNames)
         if isinstance(node, ForNode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.expr2)
-            self.walkNode(node.expr3)
-            self.walkNode(node.block)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr2, newNames)
+            newNames = self.walkNode(node.expr3, newNames)
+            newNames = self.walkNode(node.block, newNames)
         if isinstance(node, ForENode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.block)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.block, newNames)
         if isinstance(node, IfelNode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.block)
-            self.walkNode(node.recur)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.recur, newNames)
         if isinstance(node, SwitchNode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.block)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.block, newNames)
         if isinstance(node, CaseNode):
-            self.walkNode(node.expr1)
-            self.walkNode(node.extra1)
-            self.walkNode(node.block)
-            self.walkNode(node.recur)
+            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.extra1, newNames)
+            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.recur, newNames)
         if isinstance(node, DefaultNode):
-            self.walkNode(node.block)
-            self.walkNode(node.recur)
+            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.recur, newNames)
         if isinstance(node, ListNode):
-            self.walkNode(node.extra1)
-        if isinstance(nodeList[j], AssignNode):
-            self.walkNode(node.expr1)
-        if isinstance(nodeList[j], ArgsNode):
-            self.walkNode(node.extra1)
-        if isinstance(nodeList[j], FuncNode):
-            self.walkNode(node.extra1)
-            self.walkNode(node.block)
-        if isinstance(nodeList[j], CallNode):
-            self.walkNode(node.extra1)
-            self.walkNode(node.extra2)
-        if isinstance(nodeList[j], AwaitNode):
-            self.walkNode(node.extra1)
-        if isinstance(nodeList[j], ImportNode):
-            self.walkNode(node.extra1)
-        return None
+            newNames = self.walkNode(node.extra1, newNames)
+        if isinstance(node, AssignNode):
+            newNames.append(node.name)
+            newNames = self.walkNode(node.expr1, newNames)
+        if isinstance(node, ArgsNode):
+            newNames = self.walkNode(node.expr1, newNames)
+        if isinstance(node, FuncNode):
+            newNames.append(node.name)
+            node.names = self.walkNode(node.extra1, node.names)
+            self.walkNode(node.block, node.names)
+        if isinstance(node, CallNode):
+            newNames = self.walkNode(node.extra1, newNames)
+            newNames = self.walkNode(node.extra2, newNames)
+        if isinstance(node, AwaitNode):
+            newNames = self.walkNode(node.extra1, newNames)
+        if isinstance(node, ImportNode):
+            newNames = newNames + node.extra1
+        return newNames
