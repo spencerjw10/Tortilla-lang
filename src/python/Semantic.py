@@ -548,7 +548,7 @@ def hoist(nodeList):
     return names
 '''Error types
 9 Undeclared Name
-10
+10 Undeclared Function or Class
 11
 12
 13
@@ -559,67 +559,72 @@ class NameCheck:
     def __init__(self, nodes):
         self.nodes = nodes
 
-    def check(self, given, names):
-        if given not in names:
-            #Error 9
-            return False
-        return True
-
-    def walkNode(self, node, names):
+    def walkNode(self, node, names, parentList):
         newNames = names
+        if isinstance(node, list):
+            j = 0
+            while j < len(node):
+                newNames = self.walkNode(node[j], newNames, parentList)
+                j += 1
         if isinstance(node, UnOpNode):
-            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
         if isinstance(node, BinOpNode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.expr2, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.expr2, newNames, parentList)
         if isinstance(node, VarNode):
-            newNames = self.walkNode(node.expr1, newNames)
+            if node.name not in newNames:
+                #9
+                parentList.insert(0, AssignNode("Null", node.name, BasicNode(None, "Null", node.line, node.col), node.line, node.col))
+                newNames.append(node.name)
+            newNames = self.walkNode(node.extra1, newNames, parentList)
         if isinstance(node, AccNode):
-            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
         if isinstance(node, GroupNode):
-            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
         if isinstance(node, WhileNode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.block, newNames, parentList)
         if isinstance(node, ForNode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.expr2, newNames)
-            newNames = self.walkNode(node.expr3, newNames)
-            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.expr2, newNames, parentList)
+            newNames = self.walkNode(node.expr3, newNames, parentList)
+            newNames = self.walkNode(node.block, newNames, parentList)
         if isinstance(node, ForENode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.block, newNames, parentList)
         if isinstance(node, IfelNode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.block, newNames)
-            newNames = self.walkNode(node.recur, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.block, newNames, parentList)
+            newNames = self.walkNode(node.recur, newNames, parentList)
         if isinstance(node, SwitchNode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.block, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.block, newNames, parentList)
         if isinstance(node, CaseNode):
-            newNames = self.walkNode(node.expr1, newNames)
-            newNames = self.walkNode(node.extra1, newNames)
-            newNames = self.walkNode(node.block, newNames)
-            newNames = self.walkNode(node.recur, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
+            newNames = self.walkNode(node.extra1, newNames, parentList)
+            newNames = self.walkNode(node.block, newNames, parentList)
+            newNames = self.walkNode(node.recur, newNames, parentList)
         if isinstance(node, DefaultNode):
-            newNames = self.walkNode(node.block, newNames)
-            newNames = self.walkNode(node.recur, newNames)
+            newNames = self.walkNode(node.block, newNames, parentList)
+            newNames = self.walkNode(node.recur, newNames, parentList)
         if isinstance(node, ListNode):
-            newNames = self.walkNode(node.extra1, newNames)
+            newNames = self.walkNode(node.extra1, newNames, parentList)
         if isinstance(node, AssignNode):
             newNames.append(node.name)
-            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
         if isinstance(node, ArgsNode):
-            newNames = self.walkNode(node.expr1, newNames)
+            newNames = self.walkNode(node.expr1, newNames, parentList)
         if isinstance(node, FuncNode):
-            newNames.append(node.name)
-            node.names = self.walkNode(node.extra1, node.names)
-            self.walkNode(node.block, node.names)
+            node.names = self.walkNode(node.extra1, node.names, parentList)
+            self.walkNode(node.block, node.names, parentList)
         if isinstance(node, CallNode):
-            newNames = self.walkNode(node.extra1, newNames)
-            newNames = self.walkNode(node.extra2, newNames)
+            if node.name not in newNames:
+                # 10
+                obob = 2
+            newNames = self.walkNode(node.extra1, newNames, parentList)
+            newNames = self.walkNode(node.extra2, newNames, parentList)
         if isinstance(node, AwaitNode):
-            newNames = self.walkNode(node.extra1, newNames)
+            newNames = self.walkNode(node.extra1, newNames, parentList)
         if isinstance(node, ImportNode):
             newNames = newNames + node.extra1
         return newNames

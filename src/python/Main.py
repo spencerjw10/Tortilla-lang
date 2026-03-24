@@ -24,4 +24,6 @@ jumm:[bob](jim, ted)
 """
 tokens = tokenize(code)
 tree = Semantic.Parse(tokens).parsePrgm()
-tree = Semantic.hoist(tree)
+treeNames = Semantic.hoist(tree)
+nameChecker = Semantic.NameCheck(tree)
+tree = nameChecker.walkNode(tree, treeNames, treeNames)
