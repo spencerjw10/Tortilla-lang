@@ -22,6 +22,7 @@ class UnOpNode(Node):
         super().__init__(lin, colum)
         self.op = op
         self.expr1 = expr1
+        self.dt = None
 #expr1, op, expr2
 class BinOpNode(Node):
     def __init__(self, expr1, op, expr2, lin, colum):
@@ -29,18 +30,20 @@ class BinOpNode(Node):
         self.expr1 = expr1
         self.op = op
         self.expr2 = expr2
-#num|str|bool, kind
+        self.dt = None
+#num|str|bool, dt
 class BasicNode(Node):
-    def __init__(self, num, kind, lin, colum):
+    def __init__(self, num, dt, lin, colum):
         super().__init__(lin, colum)
         self.num = num
-        self.kind = kind
+        self.dt = dt
 #name, extra1
 class VarNode(Node):
     def __init__(self, name, extra1, lin, colum):
         super().__init__(lin, colum)
         self.name = name
         self.extra1 = extra1
+        self.dt = None
 #kind, expr1
 class AccNode(Node):
     def __init__(self, kind, expr1, lin, colum):
@@ -106,13 +109,14 @@ class ListNode(Node):
         super().__init__(lin, colum)
         self.kind = kind
         self.extra1 = extra1
-#kind, name, expr1
+#dt, name, expr1
 class AssignNode(Node):
-    def __init__(self, kind, name, expr1, lin, colum):
+    def __init__(self, dt, name, expr1, lin, colum):
         super().__init__(lin, colum)
-        self.kind = kind
+        self.dt = dt
         self.name = name
         self.expr1 = expr1
+        self.dt = None
 #extra1
 class ArgsNode(Node):
     def __init__(self, extra1, lin, colum):
@@ -163,7 +167,7 @@ BPChart = {
         'Point':   100, 'Lbrc': 100, 'Lpar': 100
     }
 DT = [
-    "int", "bigInt", "float", "doub", "char", "bool", "str", "array", "dict", "set", "type"
+    "null", "int", "bigInt", "float", "doub", "char", "bool", "str", "array", "dict", "set", "type"
 ]
 '''Error types
 3 End of Script
@@ -442,11 +446,11 @@ class Parse:
         line = self.tokens[self.i].line
         col = self.tokens[self.i].col
 
-        kind = self.consume()
+        dt = self.consume()
         val = self.parseVar()
         self.expect("Assign")
         expr = self.pratt(0)
-        return AssignNode(kind, val, expr, line, col)
+        return AssignNode(dt, val, expr, line, col)
     #start on
     def parseVar(self):
         line = self.tokens[self.i].line
@@ -539,22 +543,18 @@ class Parse:
 #Hoister
 def hoist(nodeList):
     j = 0
-    names = []
+    names = {}
     while j < len(nodeList):
         if isinstance(nodeList[j], FuncNode):
-            names.append(nodeList[j].name)
+            names.update({nodeList[j].name: nodeList[j].dt})
             nodeList[j].names = hoist(nodeList[j].block)
         j += 1
     return names
 '''Error types
 9 Undeclared Name
 10 Undeclared Function or Class
-11
-12
-13
 '''
 #Name Checker
-
 class NameCheck:
     def __init__(self, nodes):
         self.nodes = nodes
@@ -566,65 +566,200 @@ class NameCheck:
             while j < len(node):
                 newNames = self.walkNode(node[j], newNames, parentList)
                 j += 1
-        if isinstance(node, UnOpNode):
+        elif isinstance(node, (UnOpNode, AccNode, GroupNode)):
             newNames = self.walkNode(node.expr1, newNames, parentList)
-        if isinstance(node, BinOpNode):
+        elif isinstance(node, BinOpNode):
             newNames = self.walkNode(node.expr1, newNames, parentList)
             newNames = self.walkNode(node.expr2, newNames, parentList)
-        if isinstance(node, VarNode):
+        elif isinstance(node, VarNode):
             if node.name not in newNames:
                 #9
-                parentList.insert(0, AssignNode("Null", node.name, BasicNode(None, "Null", node.line, node.col), node.line, node.col))
+                parentList.insert(0, AssignNode("null", node.name, BasicNode(None, "Null", node.line, node.col), node.line, node.col))
                 newNames.append(node.name)
             newNames = self.walkNode(node.extra1, newNames, parentList)
-        if isinstance(node, AccNode):
-            newNames = self.walkNode(node.expr1, newNames, parentList)
-        if isinstance(node, GroupNode):
-            newNames = self.walkNode(node.expr1, newNames, parentList)
-        if isinstance(node, WhileNode):
+        elif isinstance(node, (WhileNode, ForENode, SwitchNode)):
             newNames = self.walkNode(node.expr1, newNames, parentList)
             newNames = self.walkNode(node.block, newNames, parentList)
-        if isinstance(node, ForNode):
+        elif isinstance(node, ForNode):
             newNames = self.walkNode(node.expr1, newNames, parentList)
             newNames = self.walkNode(node.expr2, newNames, parentList)
             newNames = self.walkNode(node.expr3, newNames, parentList)
             newNames = self.walkNode(node.block, newNames, parentList)
-        if isinstance(node, ForENode):
-            newNames = self.walkNode(node.expr1, newNames, parentList)
-            newNames = self.walkNode(node.block, newNames, parentList)
-        if isinstance(node, IfelNode):
+        elif isinstance(node, IfelNode):
             newNames = self.walkNode(node.expr1, newNames, parentList)
             newNames = self.walkNode(node.block, newNames, parentList)
             newNames = self.walkNode(node.recur, newNames, parentList)
-        if isinstance(node, SwitchNode):
-            newNames = self.walkNode(node.expr1, newNames, parentList)
-            newNames = self.walkNode(node.block, newNames, parentList)
-        if isinstance(node, CaseNode):
+        elif isinstance(node, CaseNode):
             newNames = self.walkNode(node.expr1, newNames, parentList)
             newNames = self.walkNode(node.extra1, newNames, parentList)
             newNames = self.walkNode(node.block, newNames, parentList)
             newNames = self.walkNode(node.recur, newNames, parentList)
-        if isinstance(node, DefaultNode):
+        elif isinstance(node, DefaultNode):
             newNames = self.walkNode(node.block, newNames, parentList)
             newNames = self.walkNode(node.recur, newNames, parentList)
-        if isinstance(node, ListNode):
+        elif isinstance(node, (ListNode, AwaitNode, ArgsNode)):
             newNames = self.walkNode(node.extra1, newNames, parentList)
-        if isinstance(node, AssignNode):
+        elif isinstance(node, AssignNode):
             newNames.append(node.name)
             newNames = self.walkNode(node.expr1, newNames, parentList)
-        if isinstance(node, ArgsNode):
-            newNames = self.walkNode(node.expr1, newNames, parentList)
-        if isinstance(node, FuncNode):
-            node.names = self.walkNode(node.extra1, node.names, parentList)
+        elif isinstance(node, FuncNode):
+            node.names = self.walkNode(node.extra1, node.names, [])
             self.walkNode(node.block, node.names, parentList)
-        if isinstance(node, CallNode):
+        elif isinstance(node, CallNode):
             if node.name not in newNames:
                 # 10
                 obob = 2
-            newNames = self.walkNode(node.extra1, newNames, parentList)
+            newNames.update({self.walkNode(node.extra1, newNames, parentList): node.dt})
             newNames = self.walkNode(node.extra2, newNames, parentList)
-        if isinstance(node, AwaitNode):
-            newNames = self.walkNode(node.extra1, newNames, parentList)
-        if isinstance(node, ImportNode):
-            newNames = newNames + node.extra1
+        elif isinstance(node, ImportNode):
+            newNames = newNames.update({node.extra1: "module"})
         return newNames
+
+'''
+11 Used operator on incompatible type: soft error, return null
+12 Unkown Error: hard error, return null
+
+11 Divide by 0: soft error, return null
+12 Overflow error: soft error, return null
+13 Use null in an operation: soft error, null = 0
+14 Variable turns into null: soft error, points to error 8 if logical
+15 Assign func/class w/o return: return null
+16 Initlize wrong DT: soft error, change DT
+17 Assign wrong DT: soft error, ignore change
+
+'''
+#Type Checker
+numTypes = ["int", "bigInt", "float", "doub"]
+colTypes = ["dict", "array", "set"]
+
+class TypeCheck:
+    def __init__(self, nodes):
+        self.nodes = nodes
+
+    def walkNode(self, node):
+        if isinstance(node, list):
+            j = 0
+            while j < len(node):
+                self.walkNode(node[i])
+                j += 1
+        elif isinstance(node, BasicNode):
+            return node.dt
+        elif isinstance(node, ArgsNode):
+            self.walkNode(node.extra1)
+        elif isinstance(node, UnOpNode):
+            OGdt = self.walkNode(node.expr1)
+            dt = "bool"
+            if node.op == "BitNot":
+                if OGdt not in numTypes:
+                    #11
+                    dt = "null"
+                else:
+                    dt = OGdt
+            elif node.op != "Not":
+                #12
+                dt = "null"
+            elif node.op in ["Inc", "Dec"]:
+                if OGdt == var:
+                    return "none"
+                else:
+                    #11
+                    return "null"
+            return dt
+        elif isinstance(node, AccNode):
+            self.walkNode(node.expr1)
+        elif isinstance(node, GroupNode):
+            self.walkNode(node.expr1)
+        elif isinstance(node, BinOpNode):
+            dt1 = self.walkNode(node.expr1)
+            dt2 = self.walkNode(node.expr2)
+            if node.op in ["Power", "Times", "Mod", "Minus", "Shl", "Shr", "BitOr", "BitAnd", "BitXor"]:
+                if dt1 in numTypes and dt2 in numTypes:
+                    if "doub" in [dt1, dt2]:
+                        return "doub"
+                    elif "bigInt" in [dt1, dt2]:
+                        if "float" in [dt1, dt2]:
+                            return "doub"
+                        return "float"
+                    elif "float" in [dt1, dt2]:
+                        return "float"
+                    else:
+                        return dt1
+            elif node.op == "Divide":
+                if dt1 in numTypes and dt2 in numTypes:
+                    if "doub" in [dt1, dt2] or "bigInt" in [dt1, dt2]:
+                        return "doub"
+                    else:
+                        return "float"
+            elif node.op == "Plus":
+                if dt1 in colTypes and dt2 in colTypes and dt1 == dt2:
+                    return dt1
+                elif dt1 in ["str", "char"] or dt2 in ["str", "char"]:
+                    return "str"
+                elif dt1 in numTypes and dt2 in numTypes:
+                    if "doub" in [dt1, dt2]:
+                        return "doub"
+                    elif "bigInt" in [dt1, dt2]:
+                        if "float" in [dt1, dt2]:
+                            return "doub"
+                        return "float"
+                    elif "float" in [dt1, dt2]:
+                        return "float"
+                    else:
+                        return dt1
+            elif node.op == "in":
+                if dt2 in colTypes:
+                    return "bool"
+            elif node.op == "has":
+                if dt1 in colTypes:
+                    return "bool"
+            elif node.op in ["More", "Less", "Gte", "Lte"] and dt1 in numTypes and dt2 in numTypes:
+                return "bool"
+            elif node.op in ["is", "and", "or", "nor", "xor"]:
+                return "bool"
+            elif node.op in ["Assign", "PlusEql", "MinusEql", "TimesEql", "DivideEql", "ModEql"] and dt1 == "var":
+                return "none"
+            #11
+            return "null"
+        elif isinstance(node, VarNode):
+            self.walkNode(node.extra1)
+        elif isinstance(node, WhileNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+        elif isinstance(node, ForENode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+        elif isinstance(node, SwitchNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+        elif isinstance(node, ForNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.expr2)
+            self.walkNode(node.expr3)
+            self.walkNode(node.block)
+        elif isinstance(node, IfelNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.block)
+            self.walkNode(node.recur)
+        elif isinstance(node, CaseNode):
+            self.walkNode(node.expr1)
+            self.walkNode(node.extra1)
+            self.walkNode(node.block)
+            self.walkNode(node.recur)
+        elif isinstance(node, DefaultNode):
+            self.walkNode(node.block)
+            self.walkNode(node.recur)
+        elif isinstance(node, ListNode):
+            self.walkNode(node.extra1)
+        elif isinstance(node, AwaitNode):
+            self.walkNode(node.extra1)
+        elif isinstance(node, AssignNode):
+            self.walkNode(node.expr1)
+        elif isinstance(node, FuncNode):
+            self.walkNode(node.extra1)
+            self.walkNode(node.block)
+        elif isinstance(node, CallNode):
+            self.walkNode(node.extra1)
+            self.walkNode(node.extra2)
+        elif isinstance(node, ImportNode):
+            self.walkNode(node.extra1)
+        return None
