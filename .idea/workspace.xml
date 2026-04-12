@@ -29,29 +29,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cd8a0eb6-49c9-48c1-956f-82ba500ba7c6" name="Changes" comment="Apr 11">
-      <change beforePath="$PROJECT_DIR$/.idea/Tortilla.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Tortilla.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeCache.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CMakeCCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CMakeCXXCompiler.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CMakeDetermineCompilerABI_C.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CMakeDetermineCompilerABI_CXX.bin" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CMakeSystem.cmake" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CompilerIdC/CMakeCCompilerId.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CompilerIdC/a.out" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CompilerIdC/apple-sdk.c" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CompilerIdCXX/CMakeCXXCompilerId.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CompilerIdCXX/a.out" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/4.1.2/CompilerIdCXX/apple-sdk.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/CMakeConfigureLog.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/InstallScripts.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/TargetDirectories.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/error.cpp.o" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/lexer.cpp.o" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/Tortilla.dir/main.cpp.o" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/clion-Debug-log.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/clion-environment.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/cmake.check_cache" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/cpp/cmake-build-debug/CMakeFiles/rules.ninja" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,6 +115,10 @@
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "/Users/spencerwhite/CLionProjects/Tortilla-lang",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
     "org.rust.first.attach.projects": "true",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
@@ -188,7 +170,7 @@
       <workItem from="1774130661168" duration="801000" />
       <workItem from="1775574114919" duration="40000" />
       <workItem from="1775701922613" duration="8000" />
-      <workItem from="1775962786049" duration="132000" />
+      <workItem from="1775962786049" duration="448000" />
     </task>
     <task id="LOCAL-00001" summary="Mar 17">
       <option name="closed" value="true" />
@@ -374,7 +356,15 @@
       <option name="project" value="LOCAL" />
       <updated>1775962888268</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Apr 11">
+      <option name="closed" value="true" />
+      <created>1775962941434</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1775962941434</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
