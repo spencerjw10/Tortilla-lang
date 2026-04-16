@@ -659,7 +659,7 @@ class TypeCheck:
                 #12
                 dt = "null"
             elif node.op in ["Inc", "Dec"]:
-                if OGdt == var:
+                if OGdt == "var":
                     return "none"
                 else:
                     #11
